@@ -39,6 +39,33 @@ app.get("/api/posts", (req, res) => {
   res.json(posts);
 });
 
+app.post("/api/posts", (req, res) => {
+  const { title, content } = req.body;
+
+  if (!title || !content) {
+    return res.status(400).json({
+      success: false,
+      message: "Title and content are required."
+    });
+  }
+
+  const nextId = posts.length ? Math.max(...posts.map(post => post.id)) + 1 : 1;
+
+  const newPost = {
+    id: nextId,
+    title,
+    content
+  };
+
+  posts.push(newPost);
+
+  res.status(201).json({
+    success: true,
+    message: "Post created successfully.",
+    post: newPost
+  });
+});
+
 app.post("/api/contact", (req, res) => {
   console.log("Contact Form Submitted");
 
