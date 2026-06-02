@@ -11,6 +11,7 @@
   <a href="/">Home</a>
   <a href="/about">About</a>
   <a href="/contact">Contact</a>
+  <a href="/login">Login</a>
 </nav>
 
 <h1>Cloudflare Migration Lab</h1>
@@ -20,6 +21,8 @@ Learning Cloudflare migrations by building a real project.
 </p>
 
 <h2>Posts</h2>
+
+<div id="authStatus"></div>
 
 <form id="newPostForm">
   <label>
@@ -38,28 +41,45 @@ Learning Cloudflare migrations by building a real project.
 <div id="posts"></div>
 
 <script>
+async function loadAuth() {
+  const response = await fetch("/api/auth");
+  const auth = await response.json();
+  const status = document.getElementById("authStatus");
+  const form = document.getElementById("newPostForm");
+
+  if (auth.isLoggedIn) {
+    status.innerHTML = `Logged in as <strong>${auth.user.username}</strong>. <button id="logoutButton">Logout</button>`;
+    form.style.display = "block";
+
+    document.getElementById("logoutButton").addEventListener("click", async (event) => {
+      event.preventDefault();
+      await fetch("/api/logout", { method: "POST" });
+      await loadAuth();
+    });
+  } else {
+    status.innerHTML = `You are not logged in. <a href="/login">Login</a> to add posts.`;
+    form.style.display = "none";
+  }
+}
+
 async function loadPosts() {
   const response = await fetch("/api/posts");
-
   const posts = await response.json();
-
   const container = document.getElementById("posts");
   container.innerHTML = "";
 
   posts.forEach(post => {
     const div = document.createElement("div");
-
     div.className = "card";
-
     div.innerHTML = `
       <h3>${post.title}</h3>
       <p>${post.content}</p>
     `;
-
     container.appendChild(div);
   });
 }
 
+loadAuth();
 loadPosts();
 
 const form = document.getElementById("newPostForm");
@@ -84,7 +104,7 @@ form.addEventListener("submit", async (e) => {
 
   if (response.ok) {
     form.reset();
-    loadPosts();
+    await loadPosts();
     alert(result.message);
   } else {
     alert(result.message || "Failed to add post.");
