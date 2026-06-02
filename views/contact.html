@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contact</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<nav>
+  <a href="/">Home</a>
+  <a href="/about">About</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+<h1>Contact</h1>
+
+<form id="contactForm">
+
+  <input
+    type="text"
+    name="name"
+    placeholder="Name"
+    required
+  >
+
+  <br><br>
+
+  <input
+    type="email"
+    name="email"
+    placeholder="Email"
+    required
+  >
+
+  <br><br>
+
+  <button type="submit">
+    Submit
+  </button>
+
+</form>
+
+<script>
+
+document
+  .getElementById("contactForm")
+  .addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const form = new FormData(e.target);
+
+    const data = Object.fromEntries(form);
+
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    alert(result.message);
+  });
+
+</script>
+
+</body>
+</html>
